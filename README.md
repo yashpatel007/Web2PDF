@@ -1,5 +1,5 @@
 # Web2PDF
-Combining dunamic web scraping + save to pdf from web.
+Combining dynamic web scraping + save to pdf from web.
 This application aims at saving the pdf of all the pages from a specific page.
 
 
