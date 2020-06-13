@@ -1,5 +1,25 @@
+import pdfkit 
+from bs4 import BeautifulSoup
+import requests
+import sys
+import threading
+from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QHBoxLayout, QWidget, QComboBox, QVBoxLayout, QLineEdit ,QTextEdit, QSystemTrayIcon,QMenu,QAction
+from PyQt5.QtGui import QIcon
+from PyQt5 import QtCore
+
+url ="https://www.w3schools.com/python/"
+
 def getBaseUrl(url):
     li = url.split("/")
     print(li[0]+"//"+li[2])
 
-getBaseUrl('http://www.google.com/hello/some.html')
+def smartFindNextLink(url):
+    nxtBtnTxt= "Next ❯"
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content,'html.parser')
+    for link in soup.findAll('a' ,{'href':True}):
+        if(link.text.strip() == nxtBtnTxt):
+            print(link['href'])
+       
+
+smartFindNextLink(url)
