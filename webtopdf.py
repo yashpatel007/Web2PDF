@@ -82,6 +82,10 @@ if __name__ == "__main__":
     depth.setPlaceholderText("Num of pages eg 5")
     depth.setFixedWidth(350)
 
+    abs_path = QLineEdit()
+    abs_path.setFixedWidth(350)
+    abs_path.setPlaceholderText("abs url to file where to save pdf")
+
     submit_btn = QPushButton("Submit")
     submit_btn.clicked.connect(makePDFBaby)
 
@@ -92,6 +96,7 @@ if __name__ == "__main__":
     layout.addWidget(search_by)
     layout.addWidget(search_inp)
     layout.addWidget(depth)
+    layout.addWidget(abs_path)
     layout.addWidget(submit_btn)
     layout.addWidget(status)
    
