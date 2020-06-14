@@ -22,14 +22,23 @@ class web2pdf(object):
 
     def savePDF(self,url, fname):
         pdfkit.from_url(url,fname)
-        status.append("from "+url+"  saving... "+fname)
+        status.append("from url: "+url+" ===>  saving... ->"+fname)
 
     def getNextLinks(self):
         if(self.search_by == 0):
+            if(self.nxtBtnTxt == None):
+                status.append("button text required")
+                return []
             return self.smartFindNextLink()
         elif(self.search_by == 1):
+            if(self.elem_class == None):
+                status.append("<a> tag class required")
+                return []
             return self.getNextLinksWithAClass()
         elif(self.search_by == 2):
+            if(self.elem_class == None):
+                status.append("<a> tag wrapper element class required")
+                return []
             return self.getNextLinksWithContainerClass()
             
 
@@ -41,7 +50,11 @@ class web2pdf(object):
         #-------- Get the links based on  criteria --------------
         # get the links
         links = self.getNextLinks()
-        if(not links): pass
+        print(links)
+        if(not links):
+            submit_btn.setEnabled(True)
+            return
+        
 
         #save pdf from links
         for idx,link in enumerate(links):
@@ -54,13 +67,16 @@ class web2pdf(object):
         links.append(self.url)
         start_url = self.url
         for i in range(self.depth-1):
-            page = requests.get(start_url)
-            soup = BeautifulSoup(page.content, 'html.parser')
-            nextPage = soup.find(class_=self.elem_class)
-            link = nextPage.find('a')
-            nxt_link = self.base_url+link['href']
-            links.append(nxt_link)
-            start_url = nxt_link
+            try:
+                page = requests.get(start_url)
+                soup = BeautifulSoup(page.content, 'html.parser')
+                nextPage = soup.find(class_=self.elem_class)
+                link = nextPage.find('a')
+                nxt_link = self.base_url+link['href']
+                links.append(nxt_link)
+                start_url = nxt_link
+            except:
+                status.append("error making request to"+ start_url)
         return links
 
     def getNextLinksWithAClass(self):
@@ -68,13 +84,16 @@ class web2pdf(object):
         links.append(self.url)
         start_url = self.url
         for i in range(self.depth-1):
-            page = requests.get(start_url)
-            soup = BeautifulSoup(page.content, 'html.parser')
-            nextPage = soup.findAll('a',{"class":self.elem_class})
-            print(nextPage)
-            nxt_link = self.base_url+nextPage[0]['href']
-            links.append(nxt_link)
-            start_url = nxt_link
+            try:
+                page = requests.get(start_url)
+                soup = BeautifulSoup(page.content, 'html.parser')
+                nextPage = soup.findAll('a',{"class":self.elem_class})
+                print(nextPage)
+                nxt_link = self.base_url+nextPage[0]['href']
+                links.append(nxt_link)
+                start_url = nxt_link
+            except:
+                status.append("error making request to" + start_url)
         return links
 
     
@@ -96,22 +115,30 @@ class web2pdf(object):
 if __name__ == "__main__":
     w2p = web2pdf()
     def setw2pData():
+        # checcking and setting
         w2p.base_url = base_url.text()
         w2p.url = page_url.text()
         w2p.search_by = search_by.currentIndex()
-        if(w2p.search_by==0): w2p.nxtBtnTxt = search_inp.text()
-        else: w2p.elem_class = search_inp.text()
-        w2p.depth = int (depth.text())
 
+        if(page_url.text()==""):
+            status.append("url is required")
+            return -1
+
+        if(w2p.search_by==0 and search_inp.text()!=""): w2p.nxtBtnTxt = search_inp.text()
+        else:
+            if(search_inp.text()!=""): w2p.elem_class = search_inp.text()
+        
+        if(depth.text().isnumeric()):w2p.depth = int (depth.text())
+        else:
+            status.append("invalid number of pages")
+            return -1
+        
         if(abs_path.text()!=""): w2p.file_path = abs_path.text()
         if(file_prefix.text()!=""): w2p.file_prefix = file_prefix.text()
 
-        
-        
-
     def makePDFBaby():
         status.setText("")
-        setw2pData()
+        if(setw2pData()==-1): return 
         def run():
             try:
                 w2p.webtopdf()
