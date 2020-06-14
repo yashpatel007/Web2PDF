@@ -17,7 +17,7 @@ class web2pdf(object):
         self.nxtBtnTxt = None
         self.elem_class = None
         self.depth = 0
-        self.file_path = None
+        self.file_path = "./result/"
         self.file_prefix = "Page"
 
     def savePDF(self,url, fname):
@@ -28,7 +28,10 @@ class web2pdf(object):
         if(self.search_by == 0):
             return self.smartFindNextLink()
         elif(self.search_by == 1):
+            return self.getNextLinksWithAClass()
+        elif(self.search_by == 2):
             return self.getNextLinksWithContainerClass()
+            
 
     def getBaseUrl(self):
         li = self.url.split("/")
@@ -38,7 +41,7 @@ class web2pdf(object):
         #-------- Get the links based on  criteria --------------
         # get the links
         links = self.getNextLinks()
-        print(links)
+        if(not links): pass
 
         #save pdf from links
         for idx,link in enumerate(links):
@@ -60,6 +63,21 @@ class web2pdf(object):
             start_url = nxt_link
         return links
 
+    def getNextLinksWithAClass(self):
+        links =[]
+        links.append(self.url)
+        start_url = self.url
+        for i in range(self.depth-1):
+            page = requests.get(start_url)
+            soup = BeautifulSoup(page.content, 'html.parser')
+            nextPage = soup.findAll('a',{"class":self.elem_class})
+            print(nextPage)
+            nxt_link = self.base_url+nextPage[0]['href']
+            links.append(nxt_link)
+            start_url = nxt_link
+        return links
+
+    
     def smartFindNextLink(self):
         links =[]
         links.append(self.url)
@@ -72,13 +90,8 @@ class web2pdf(object):
                 if(link.text.strip() == self.nxtBtnTxt):
                     next_url = self.base_url+link['href']
                     links.append(next_url)
-                    
             start_url=next_url
-
         return links
-
-
-
 
 if __name__ == "__main__":
     w2p = web2pdf()
@@ -89,10 +102,15 @@ if __name__ == "__main__":
         if(w2p.search_by==0): w2p.nxtBtnTxt = search_inp.text()
         else: w2p.elem_class = search_inp.text()
         w2p.depth = int (depth.text())
-        w2p.file_path = abs_path.text()
-        w2p.file_prefix = file_prefix.text()
+
+        if(abs_path.text()!=""): w2p.file_path = abs_path.text()
+        if(file_prefix.text()!=""): w2p.file_prefix = file_prefix.text()
+
+        
+        
 
     def makePDFBaby():
+        status.setText("")
         setw2pData()
         def run():
             try:
