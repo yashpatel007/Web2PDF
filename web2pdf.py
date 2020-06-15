@@ -7,6 +7,9 @@ from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QHBoxLayout, QWid
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtCore
 
+path_wkhtmltopdf = r'tools\wkhtmltopdf.exe'
+config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+
 combo_options = ["Smart search - by next button text","By <a> tag class", "By <a> tag container class"]
 
 class web2pdf(object):
@@ -243,3 +246,5 @@ if __name__ == "__main__":
     window.setFixedSize(400,600)
     window.show()
     sys.exit(app.exec_())
+
+    
